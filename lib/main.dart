@@ -51,8 +51,8 @@ class MyHomePage extends StatelessWidget {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: Selector<AppProvider, List<DaySchedule>>(
-        builder: (context, value, child) {
+      floatingActionButton: Consumer<AppProvider>(
+        builder: (context, AppProvider appProvider, child) {
           bool isScheduleAvailable = false;
           for (DaySchedule e in appProvider.days) {
             isScheduleAvailable = e.availableTime.isNotEmpty;
@@ -61,6 +61,12 @@ class MyHomePage extends StatelessWidget {
           return GestureDetector(
             onTap: () {
               if (isScheduleAvailable) {
+                appProvider.selectedTile.removeWhere((day) => (appProvider
+                    .days[appProvider.days
+                        .indexWhere((element) => element.title == day)]
+                    .availableTime
+                    .isEmpty));
+                appProvider.notify();
                 Navigator.of(context).push(MaterialPageRoute(
                     builder: (context) => const _SecondPage()));
               }
@@ -73,18 +79,22 @@ class MyHomePage extends StatelessWidget {
                     ? Theme.of(context).primaryColor
                     : Colors.grey,
                 borderRadius: BorderRadius.circular(26),
-                boxShadow: [
-                  BoxShadow(
-                    color: Theme.of(context).primaryColor.withOpacity(0.2),
-                    blurRadius: 6,
-                    offset: const Offset(0, 4),
-                  ),
-                  BoxShadow(
-                    color: Theme.of(context).primaryColor.withOpacity(0.2),
-                    blurRadius: 16,
-                    offset: const Offset(0, 12),
-                  ),
-                ],
+                boxShadow: isScheduleAvailable
+                    ? [
+                        BoxShadow(
+                          color:
+                              Theme.of(context).primaryColor.withOpacity(0.2),
+                          blurRadius: 6,
+                          offset: const Offset(0, 4),
+                        ),
+                        BoxShadow(
+                          color:
+                              Theme.of(context).primaryColor.withOpacity(0.2),
+                          blurRadius: 16,
+                          offset: const Offset(0, 12),
+                        ),
+                      ]
+                    : [],
               ),
               margin: const EdgeInsets.all(20),
               width: double.infinity,
@@ -97,7 +107,6 @@ class MyHomePage extends StatelessWidget {
             ),
           );
         },
-        selector: (p0, p1) => p1.days,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20.0),
@@ -270,13 +279,14 @@ class _SecondPage extends StatelessWidget {
           ),
           margin: const EdgeInsets.all(20),
           width: double.infinity,
-          child: Center(
+          child: const Center(
             child: Text(
-              appProvider.days
-                      .any((element) => element.availableTime.isNotEmpty)
-                  ? "Edit schedule"
-                  : "Save",
-              style: const TextStyle(color: Colors.white, fontSize: 16),
+              // appProvider.days
+              //         .any((element) => element.availableTime.isNotEmpty)
+              //     ?
+              "Edit schedule",
+              // : "Save",
+              style: TextStyle(color: Colors.white, fontSize: 16),
             ),
           ),
         ),

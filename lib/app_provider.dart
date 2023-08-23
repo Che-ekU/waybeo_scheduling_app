@@ -17,10 +17,13 @@ class AppProvider extends ChangeNotifier {
 
   String getAvailableTime() {
     String availableTime = 'Hi Jose you are available in ';
-
     for (DaySchedule e in days) {
       if (e.availableTime.isNotEmpty) {
-        if (days.indexOf(e) == days.length - 1) {
+        if (days.indexOf(e) == days.length - 1 ||
+            (days.lastIndexWhere(
+                        (element) => element.availableTime.isNotEmpty) ==
+                    days.indexOf(e) &&
+                selectedTile.indexOf(e.title) != 0)) {
           if (days.length != 1) {
             availableTime =
                 availableTime.substring(0, availableTime.length - 2);
